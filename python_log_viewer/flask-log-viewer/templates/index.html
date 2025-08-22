@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Log Viewer</h1>
+    <p>Select a service to view its logs:</p>
+    <form action="/api/logs" method="GET">
+        <label for="service">Choose a service:</label>
+        <select name="service" id="service">
+            <option value="apache">Apache</option>
+            <option value="nginx">Nginx</option>
+            <option value="mysql">MySQL</option>
+            <option value="mongodb">MongoDB</option>
+            <option value="custom">Custom Directory</option>
+        </select>
+        <input type="text" name="custom_path" placeholder="Custom log directory (if applicable)">
+        <button type="submit">View Logs</button>
+    </form>
+    <div id="logs">
+        {% if logs %}
+            <h2>Logs:</h2>
+            <pre>{{ logs }}</pre>
+        {% endif %}
+    </div>
+</body>
+</html>
