@@ -39,7 +39,7 @@ flask-log-viewer
 1. Clone the repository:
    ```
    git clone <repository-url>
-   cd flask-log-viewer
+   cd python-log-viewer
    ```
 
 2. Install the required dependencies:
