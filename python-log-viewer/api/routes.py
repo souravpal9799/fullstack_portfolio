@@ -7,6 +7,10 @@ from services.custom import get_custom_logs
 
 api = Blueprint('api', __name__)
 
+@api.route('/api/health')
+def health():
+    return {"status": "ok"}
+
 @api.route('/logs/apache', methods=['GET'])
 def apache_logs():
     logs = get_apache_logs()
