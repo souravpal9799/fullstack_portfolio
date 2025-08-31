@@ -9,16 +9,18 @@
 <body>
     <h1>Log Viewer</h1>
     <p>Select a service to view its logs:</p>
-    <form action="/api/logs" method="GET">
+    <form id="logForm" action="/api/logs" method="GET">
         <label for="service">Choose a service:</label>
-        <select name="service" id="service">
+        <select name="service" id="service" onchange="updateFormAction()">
             <option value="apache">Apache</option>
             <option value="nginx">Nginx</option>
             <option value="mysql">MySQL</option>
             <option value="mongodb">MongoDB</option>
             <option value="custom">Custom Directory</option>
         </select>
-        <input type="text" name="custom_path" placeholder="Custom log directory (if applicable)">
+        <div id="customPathDiv" style="display: none;">
+            <input type="text" name="custom_path" id="customPath" placeholder="Custom log directory path">
+        </div>
         <button type="submit">View Logs</button>
     </form>
     <div id="logs">
@@ -27,5 +29,33 @@
             <pre>{{ logs }}</pre>
         {% endif %}
     </div>
+
+    <script>
+        function updateFormAction() {
+            const serviceSelect = document.getElementById('service');
+            const form = document.getElementById('logForm');
+            const customPathDiv = document.getElementById('customPathDiv');
+            const customPathInput = document.getElementById('customPath');
+            
+            const selectedService = serviceSelect.value;
+            
+            // Update form action based on selected service
+            if (selectedService === 'custom') {
+                form.action = '/api/custom';
+                customPathDiv.style.display = 'block';
+                customPathInput.required = true;
+            } else {
+                form.action = `/api/${selectedService}`;
+                customPathDiv.style.display = 'none';
+                customPathInput.required = false;
+                customPathInput.value = '';
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateFormAction();
+        });
+    </script>
 </body>
 </html>
