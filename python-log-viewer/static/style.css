@@ -143,6 +143,20 @@ p {
     color: #007bff;
 }
 
+.smart-status {
+    font-weight: bold;
+    color: #28a745;
+    padding: 4px 8px;
+    background-color: #d4edda;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.smart-status.disabled {
+    color: #6c757d;
+    background-color: #e2e3e5;
+}
+
 .log-console {
     background-color: #1e1e1e;
     color: #f8f8f2;

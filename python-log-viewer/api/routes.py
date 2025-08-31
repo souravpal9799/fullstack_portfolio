@@ -12,6 +12,13 @@ api = Blueprint('api', __name__)
 def health():
     return {"status": "ok"}
 
+@api.route('/api/config')
+def get_config():
+    """Get configuration for smart monitoring"""
+    return jsonify({
+        "smart_monitoring": Config.SMART_MONITORING
+    })
+
 @api.route('/api/apache', methods=['GET'])
 def apache_logs():
     # Get custom path from query params or use default
