@@ -8,53 +8,224 @@
 </head>
 <body>
     <h1>Log Viewer</h1>
-    <p>Select a service to view its logs:</p>
-    <form id="logForm" action="/api/logs" method="GET">
-        <label for="service">Choose a service:</label>
-        <select name="service" id="service" onchange="updateFormAction()">
-            <option value="apache">Apache</option>
-            <option value="nginx">Nginx</option>
-            <option value="mysql">MySQL</option>
-            <option value="mongodb">MongoDB</option>
-            <option value="custom">Custom Directory</option>
-        </select>
+    <p>Select a service and log type to view its logs:</p>
+    <form id="logForm">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="service">Choose a service:</label>
+                <select name="service" id="service" onchange="updateFormAction()">
+                    <option value="apache">Apache</option>
+                    <option value="nginx">Nginx</option>
+                    <option value="mysql">MySQL</option>
+                    <option value="mongodb">MongoDB</option>
+                    <option value="custom">Custom Directory</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="logType">Log Type:</label>
+                <select name="logType" id="logType">
+                    <option value="access">Access Logs</option>
+                    <option value="error">Error Logs</option>
+                    <option value="all">All Logs</option>
+                </select>
+            </div>
+        </div>
         <div id="customPathDiv" style="display: none;">
             <input type="text" name="custom_path" id="customPath" placeholder="Custom log directory path">
         </div>
-        <button type="submit">View Logs</button>
+        <div class="form-actions">
+            <button type="button" onclick="startLogStream()">Start Live Log Stream</button>
+            <button type="button" onclick="stopLogStream()">Stop Stream</button>
+            <button type="button" onclick="clearConsole()">Clear Console</button>
+        </div>
     </form>
-    <div id="logs">
-        {% if logs %}
-            <h2>Logs:</h2>
-            <pre>{{ logs }}</pre>
-        {% endif %}
+    
+    <div class="console-container">
+        <h2>Live Log Console</h2>
+        <div class="console-controls">
+            <span id="streamStatus" class="status-offline">Offline</span>
+            <span id="logCount">Logs: 0</span>
+        </div>
+        <div id="logConsole" class="log-console">
+            <div class="console-placeholder">Click "Start Live Log Stream" to begin monitoring logs...</div>
+        </div>
     </div>
 
     <script>
+        let logStreamInterval = null;
+        let logCount = 0;
+        
         function updateFormAction() {
             const serviceSelect = document.getElementById('service');
-            const form = document.getElementById('logForm');
             const customPathDiv = document.getElementById('customPathDiv');
             const customPathInput = document.getElementById('customPath');
             
             const selectedService = serviceSelect.value;
             
-            // Update form action based on selected service
             if (selectedService === 'custom') {
-                form.action = '/api/custom';
                 customPathDiv.style.display = 'block';
                 customPathInput.required = true;
             } else {
-                form.action = `/api/${selectedService}`;
                 customPathDiv.style.display = 'none';
                 customPathInput.required = false;
                 customPathInput.value = '';
             }
         }
         
+        function startLogStream() {
+            if (logStreamInterval) {
+                stopLogStream();
+            }
+            
+            const service = document.getElementById('service').value;
+            const logType = document.getElementById('logType').value;
+            const customPath = document.getElementById('customPath').value;
+            
+            if (service === 'custom' && !customPath) {
+                alert('Please enter a custom path for custom service');
+                return;
+            }
+            
+            updateStreamStatus('Online', true);
+            clearConsole();
+            logCount = 0;
+            updateLogCount();
+            
+            // Start the log stream
+            fetchLogs(service, logType, customPath);
+            
+            // Set up interval for continuous log fetching
+            logStreamInterval = setInterval(() => {
+                fetchLogs(service, logType, customPath);
+            }, 2000); // Fetch every 2 seconds
+        }
+        
+        function stopLogStream() {
+            if (logStreamInterval) {
+                clearInterval(logStreamInterval);
+                logStreamInterval = null;
+                updateStreamStatus('Offline', false);
+            }
+        }
+        
+        function fetchLogs(service, logType, customPath) {
+            let url = `/api/${service}`;
+            const params = new URLSearchParams();
+            
+            if (logType !== 'all') {
+                params.append('log_type', logType);
+            }
+            
+            if (customPath) {
+                params.append('custom_path', customPath);
+            }
+            
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.logs) {
+                        displayLogs(data.logs, logType);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching logs:', error);
+                    addLogEntry('Error fetching logs: ' + error.message, 'error');
+                });
+        }
+        
+        function displayLogs(logs, logType) {
+            const console = document.getElementById('logConsole');
+            
+            if (Array.isArray(logs)) {
+                logs.forEach(log => {
+                    if (shouldDisplayLog(log, logType)) {
+                        addLogEntry(log, getLogLevel(log));
+                        logCount++;
+                        updateLogCount();
+                    }
+                });
+            } else if (typeof logs === 'string') {
+                // Handle string logs
+                if (shouldDisplayLog(logs, logType)) {
+                    addLogEntry(logs, 'info');
+                    logCount++;
+                    updateLogCount();
+                }
+            }
+        }
+        
+        function shouldDisplayLog(log, logType) {
+            if (logType === 'all') return true;
+            
+            const logStr = log.toString().toLowerCase();
+            if (logType === 'error') {
+                return logStr.includes('error') || logStr.includes('fail') || logStr.includes('exception');
+            } else if (logType === 'access') {
+                return !logStr.includes('error') && !logStr.includes('fail') && !logStr.includes('exception');
+            }
+            return true;
+        }
+        
+        function getLogLevel(log) {
+            const logStr = log.toString().toLowerCase();
+            if (logStr.includes('error') || logStr.includes('fail') || logStr.includes('exception')) {
+                return 'error';
+            } else if (logStr.includes('warning') || logStr.includes('warn')) {
+                return 'warning';
+            }
+            return 'info';
+        }
+        
+        function addLogEntry(log, level) {
+            const console = document.getElementById('logConsole');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${level}`;
+            logEntry.innerHTML = `
+                <span class="timestamp">[${timestamp}]</span>
+                <span class="log-content">${escapeHtml(log.toString())}</span>
+            `;
+            
+            console.appendChild(logEntry);
+            console.scrollTop = console.scrollHeight;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function clearConsole() {
+            const console = document.getElementById('logConsole');
+            console.innerHTML = '<div class="console-placeholder">Click "Start Live Log Stream" to begin monitoring logs...</div>';
+            logCount = 0;
+            updateLogCount();
+        }
+        
+        function updateStreamStatus(status, isOnline) {
+            const statusElement = document.getElementById('streamStatus');
+            statusElement.textContent = status;
+            statusElement.className = isOnline ? 'status-online' : 'status-offline';
+        }
+        
+        function updateLogCount() {
+            document.getElementById('logCount').textContent = `Logs: ${logCount}`;
+        }
+        
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             updateFormAction();
+        });
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', function() {
+            stopLogStream();
         });
     </script>
 </body>

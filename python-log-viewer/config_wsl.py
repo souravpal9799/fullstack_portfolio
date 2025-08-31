@@ -6,11 +6,10 @@ class Config:
     ALLOWED_LOG_EXTENSIONS = {'log', 'txt'}
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB limit for uploaded logs
     
-    # Linux /var/log paths (for WSL Ubuntu environment)
-    # Using error.log files as defaults since they have content
+    # Linux /var/log paths (for WSL, Docker, or Linux environments)
     DEFAULT_LOG_PATHS = {
-        'apache': '/var/log/apache2/error.log',  # Changed from access.log to error.log
-        'nginx': '/var/log/nginx/error.log',     # Changed from access.log to error.log
+        'apache': '/var/log/apache2/access.log',
+        'nginx': '/var/log/nginx/access.log',
         'mysql': '/var/log/mysql/error.log',
         'mongodb': '/var/log/mongodb/mongod.log'
     }
@@ -20,15 +19,7 @@ class Config:
         'apache_error': '/var/log/apache2/error.log',
         'nginx_error': '/var/log/nginx/error.log',
         'mysql_error': '/var/log/mysql/error.log',
-        'mongodb_error': '/var/log/mongodb/mongod.log'
-    }
-    
-    # Access log file paths for each service
-    ACCESS_LOG_PATHS = {
-        'apache_access': '/var/log/apache2/access.log',
-        'nginx_access': '/var/log/nginx/access.log',
-        'mysql_access': '/var/log/mysql/error.log',  # MySQL typically only has error logs
-        'mongodb_access': '/var/log/mongodb/mongod.log'
+        'mongodb_error': '/var/log/mongodb/error.log'
     }
     
     # Alternative: Use Windows Event Logs (more reliable on Windows)
