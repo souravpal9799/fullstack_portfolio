@@ -215,6 +215,14 @@ p {
     color: #6bcf7f;
 }
 
+.log-entry.previous {
+    color: #74c0fc;
+    background-color: rgba(116, 192, 252, 0.1);
+    padding: 4px 8px;
+    border-radius: 3px;
+    border-left: 3px solid #74c0fc;
+}
+
 /* Scrollbar styling for console */
 .log-console::-webkit-scrollbar {
     width: 8px;

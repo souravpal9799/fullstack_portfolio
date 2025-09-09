@@ -13,7 +13,9 @@ class Config:
         'check_interval': 2000,             # Check interval in milliseconds (2 seconds)
         'auto_restart': False,              # Auto-restart monitoring after some time
         'restart_delay': 30000,             # Delay before auto-restart (30 seconds)
-        'log_change_threshold': 0.1         # Minimum change threshold (10% of logs must change)
+        'log_change_threshold': 0.1,        # Minimum change threshold (10% of logs must change)
+        'show_previous_lines': True,        # Show previous lines when no new logs detected
+        'previous_lines_count': 50          # Number of previous lines to show
     }
     
     # Using log files that have actual content
