@@ -1,9 +1,5 @@
 from flask import Blueprint, jsonify, request
-from services.apache import get_apache_logs
-from services.nginx import get_nginx_logs
-from services.mysql import get_mysql_logs
-from services.mongodb import get_mongodb_logs
-from services.custom import get_custom_logs
+from services.log_service import get_apache_logs, get_nginx_logs, get_mysql_logs, get_mongodb_logs, get_custom_logs
 from api.utils import get_last_n_lines
 from config import Config
 

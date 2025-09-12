@@ -54,9 +54,9 @@ class Config:
     USE_WINDOWS_EVENT_LOGS = False
     
     SERVICE_LOGS = {
-        'apache': 'services.apache.get_apache_logs',
-        'nginx': 'services.nginx.get_nginx_logs',
-        'mysql': 'services.mysql.get_mysql_logs',
-        'mongodb': 'services.mongodb.get_mongodb_logs',
-        'custom': 'services.custom.get_custom_logs'
+        'apache': 'services.log_service.get_apache_logs',
+        'nginx': 'services.log_service.get_nginx_logs',
+        'mysql': 'services.log_service.get_mysql_logs',
+        'mongodb': 'services.log_service.get_mongodb_logs',
+        'custom': 'services.log_service.get_custom_logs'
     }

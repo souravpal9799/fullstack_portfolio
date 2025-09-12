@@ -1,5 +1,1 @@
-from .apache import get_apache_logs
-from .nginx import get_nginx_logs
-from .mysql import get_mysql_logs
-from .mongodb import get_mongodb_logs
-from .custom import get_custom_logs
+from .log_service import get_apache_logs, get_nginx_logs, get_mysql_logs, get_mongodb_logs, get_custom_logs
