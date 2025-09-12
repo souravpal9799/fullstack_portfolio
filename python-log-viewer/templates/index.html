@@ -69,12 +69,17 @@
             const serviceSelect = document.getElementById('service');
             const customPathDiv = document.getElementById('customPathDiv');
             const customPathInput = document.getElementById('customPath');
+            const logTypeSelect = document.getElementById('logType');
             
             const selectedService = serviceSelect.value;
             
             if (selectedService === 'custom') {
                 customPathDiv.style.display = 'block';
                 customPathInput.required = true;
+                // Ensure log type switches to 'all' when custom is selected
+                if (logTypeSelect) {
+                    logTypeSelect.value = 'all';
+                }
             } else {
                 customPathDiv.style.display = 'none';
                 customPathInput.required = false;
